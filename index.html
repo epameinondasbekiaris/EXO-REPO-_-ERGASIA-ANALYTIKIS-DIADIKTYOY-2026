@@ -142,7 +142,7 @@
       left: 0;
       display: grid;
       width: min(100%, 520px);
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       margin: 0 auto;
       padding: 8px 10px max(8px, env(safe-area-inset-bottom));
       border-top: 1px solid var(--line);
@@ -188,6 +188,14 @@
     .saved-card .small-button, .plan-card .small-button { flex: 0 0 auto; }
     .view-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .view-title-row h2 { margin: 22px 0 11px; font-size: 17px; }
+    .recommendation-list { display: grid; gap: 10px; }
+    .recommendation-card { padding: 14px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .recommendation-heading { display: flex; align-items: center; gap: 11px; }
+    .recommendation-copy { min-width: 0; flex: 1; }
+    .recommendation-copy strong { display: block; font-size: 13px; }
+    .recommendation-copy small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.4; }
+    .interest-count { flex: 0 0 auto; color: var(--green); font-size: 10px; font-weight: 800; text-align: right; }
+    .recommendation-card .small-button { width: 100%; margin-top: 12px; }
     .plan-summary { margin: -7px 0 18px; color: var(--muted); font-size: 13px; }
     .detail-dialog { width: min(calc(100% - 28px), 440px); max-height: 85vh; padding: 22px; border: 0; border-radius: 20px; background: #fff; box-shadow: 0 24px 80px rgba(15,30,25,.25); }
     .detail-dialog::backdrop { background: rgba(15,30,25,.48); backdrop-filter: blur(3px); }
@@ -367,6 +375,16 @@
           <div class="saved-list" id="savedList"></div>
         </section>
 
+        <section id="forYouView" class="app-view" hidden aria-labelledby="forYouTitle">
+          <div class="view-header">
+            <p class="eyebrow">Picked around your interests</p>
+            <h1 id="forYouTitle">For you.</h1>
+            <p class="intro">Your recommendations learn from categories and places you explore, save, plan, and choose.</p>
+          </div>
+          <div class="recommendation-list" id="recommendationList"></div>
+          <p class="footnote">Interest counts are based on your actions during this session. Today's mood, appetite, budget, and region also shape these recommendations.</p>
+        </section>
+
         <section id="planView" class="app-view" hidden aria-labelledby="planTitle">
           <div class="view-header">
             <p class="eyebrow">Make it a day</p>
@@ -380,6 +398,7 @@
     <nav class="app-nav" id="appNav" aria-label="Main navigation" hidden>
       <button class="tab-button" type="button" data-tab="today" aria-current="page"><span class="tab-icon" aria-hidden="true">☀</span>Today</button>
       <button class="tab-button" type="button" data-tab="explore"><span class="tab-icon" aria-hidden="true">⌕</span>Explore</button>
+      <button class="tab-button" type="button" data-tab="for-you"><span class="tab-icon" aria-hidden="true">✦</span>For You</button>
       <button class="tab-button" type="button" data-tab="saved"><span class="tab-icon" aria-hidden="true">♡</span>Saved</button>
       <button class="tab-button" type="button" data-tab="plan"><span class="tab-icon" aria-hidden="true">☷</span>My plan</button>
     </nav>
@@ -400,27 +419,36 @@
       { id: 'dining', name: 'Tavernas & dining', icon: '🍽️', detail: 'A proper meal, made memorable', crowd: 68, price: 2, moods: ['chill', 'social', 'adventurous'], appetites: ['hungry'], tint: '#f4e3d8' },
       { id: 'culture', name: 'Arts & culture', icon: '🎭', detail: 'Exhibitions, cinema & culture', crowd: 53, price: 1, moods: ['chill', 'adventurous'], appetites: ['light', 'hungry', 'drinks'], tint: '#dcecf2' },
       { id: 'cafes', name: 'Cafés & bakeries', icon: '☕', detail: 'Coffee, pastries & slow moments', crowd: 42, price: 1, moods: ['chill', 'social'], appetites: ['light', 'hungry'], tint: '#e9e8d7' },
-      { id: 'outdoors', name: 'Seaside & outdoors', icon: '🌊', detail: 'A walk, a view & some fresh air', crowd: 29, price: 1, moods: ['chill', 'adventurous'], appetites: ['light', 'drinks'], tint: '#d9edf0' }
+      { id: 'outdoors', name: 'Seaside & outdoors', icon: '🌊', detail: 'A walk, a view & some fresh air', crowd: 29, price: 1, moods: ['chill', 'adventurous'], appetites: ['light', 'drinks'], tint: '#d9edf0' },
+      { id: 'escape-rooms', name: 'Escape Rooms', icon: '🗝️', detail: 'Puzzle rooms and team challenges', crowd: 48, price: 2, moods: ['social', 'adventurous'], appetites: ['light', 'hungry', 'drinks'], tint: '#e4e0f3' },
+      { id: 'cinemas', name: 'Cinemas (Movie Theaters)', icon: '🎬', detail: 'Movie theaters and open-air screens', crowd: 53, price: 1, moods: ['chill', 'adventurous'], appetites: ['light', 'hungry', 'drinks'], tint: '#dcecf2' },
+      { id: 'theaters', name: 'Theaters (Live Plays)', icon: '🎭', detail: 'Live plays and stage performances', crowd: 59, price: 2, moods: ['chill', 'adventurous'], appetites: ['light', 'hungry', 'drinks'], tint: '#e9ddf1' },
+      { id: 'mezedopoleia-koutoukia', name: 'Mezedopoleia / Koutoukia', icon: '🍽️', detail: 'Traditional Greek taverns serving small plates', crowd: 68, price: 2, moods: ['chill', 'social', 'adventurous'], appetites: ['hungry', 'drinks'], tint: '#f4e3d8' },
+      { id: 'chill-drink-spots', name: 'Chill Drink Spots', icon: '🍸', detail: 'Rooftops, lounges, and laid-back drinks', crowd: 76, price: 2, moods: ['chill', 'social'], appetites: ['drinks', 'light'], tint: '#f6e8d2' },
+      { id: 'nightclubs-nightlife', name: 'Nightclubs / Nightlife', icon: '🪩', detail: 'High-energy clubs and late-night dance floors', crowd: 88, price: 2, moods: ['social', 'energetic', 'adventurous'], appetites: ['drinks'], tint: '#e8dff8' },
+      { id: 'bowling-billiards', name: 'Bowling & Billiard Halls', icon: '🎳', detail: 'Bowling lanes, billiards, and friendly competition', crowd: 45, price: 2, moods: ['social', 'energetic', 'adventurous'], appetites: ['light', 'hungry', 'drinks'], tint: '#d8e7a0' },
+      { id: 'board-game-cafes', name: 'Board Game Cafes', icon: '🎲', detail: 'Board games, snacks, and a table to share', crowd: 42, price: 1, moods: ['chill', 'social', 'adventurous'], appetites: ['light', 'hungry', 'drinks'], tint: '#ddd2f2' }
     ];
 
     const venues = [
       { id: 'gazarte', name: 'Gazarte', category: 'live-music', area: 'Gazi', region: 'Athens Centre', crowd: 91, price: 2, description: 'Live performances and rooftop views in the heart of Gazi.' },
       { id: 'six-dogs', name: 'six d.o.g.s', category: 'bars', area: 'Monastiraki', region: 'Athens Centre', crowd: 77, price: 2, description: 'A creative all-day bar, garden courtyard, and live music venue.' },
-      { id: 'studio-24', name: 'Studio 24', category: 'dancing', area: 'Gazi', region: 'Athens Centre', crowd: 84, price: 2, description: 'A late-night dance spot for big sounds and a high-energy crowd.' },
-      { id: 'a-for-athens', name: 'A for Athens', category: 'bars', area: 'Monastiraki', region: 'Athens Centre', crowd: 75, price: 3, description: 'A rooftop cocktail bar with a view over the Acropolis and the city.' },
-      { id: 'taverna-psyrri', name: 'Taverna tou Psyrri', category: 'dining', area: 'Psyrri', region: 'Athens Centre', crowd: 68, price: 2, description: 'A neighborhood spot for traditional meze, house wine, and long conversations.' },
-      { id: 'cine-thisio', name: 'Cine Thisio', category: 'culture', area: 'Thissio', region: 'Athens Centre', crowd: 53, price: 1, description: 'An open-air cinema with an Acropolis view on a warm evening.' },
-      { id: 'playce-panormou', name: 'Playce Panormou', category: 'cafes', area: 'Panormou', region: 'North Athens', crowd: 42, price: 1, description: 'A friendly board game cafe with snacks and plenty of time to play.' },
-      { id: 'athens-bowling', name: 'Athens Bowling Center', category: 'outdoors', area: 'Marousi', region: 'North Athens', crowd: 37, price: 2, description: 'Bowling, billiards, and arcade games for a playful group outing.' },
-      { id: 'theatro-technis', name: 'Theatro Technis', category: 'culture', area: 'Exarchia', region: 'Athens Centre', crowd: 59, price: 2, description: 'An intimate theatre with a programme of Greek and international plays.' },
+      { id: 'studio-24', name: 'Studio 24 Athens', category: 'dancing', additionalCategories: ['nightclubs-nightlife'], area: 'Gazi', region: 'Athens Centre', crowd: 84, price: 2, description: 'A late-night dance spot for big sounds and a high-energy crowd.' },
+      { id: 'a-for-athens', name: 'A for Athens', category: 'bars', additionalCategories: ['chill-drink-spots'], area: 'Monastiraki', region: 'Athens Centre', crowd: 75, price: 3, description: 'A rooftop cocktail bar with a view over the Acropolis and the city.' },
+      { id: 'taverna-psyrri', name: 'Taverna tou Psyrri', category: 'dining', additionalCategories: ['mezedopoleia-koutoukia'], area: 'Psyrri', region: 'Athens Centre', crowd: 68, price: 2, description: 'A neighborhood spot for traditional meze, house wine, and long conversations.' },
+      { id: 'cine-thisio', name: 'Cine Thisio', category: 'culture', additionalCategories: ['cinemas'], area: 'Thissio', region: 'Athens Centre', crowd: 53, price: 1, description: 'An open-air cinema with an Acropolis view on a warm evening.' },
+      { id: 'playce-panormou', name: 'Playce Panormou', category: 'cafes', additionalCategories: ['board-game-cafes'], area: 'Panormou', region: 'North Athens', crowd: 42, price: 1, description: 'A friendly board game cafe with snacks and plenty of time to play.' },
+      { id: 'athens-bowling', name: 'Athens Bowling Center', category: 'outdoors', additionalCategories: ['bowling-billiards'], area: 'Marousi', region: 'North Athens', crowd: 37, price: 2, description: 'Bowling, billiards, and arcade games for a playful group outing.' },
+      { id: 'theatro-technis', name: 'Theatro Technis', category: 'culture', additionalCategories: ['theaters'], area: 'Exarchia', region: 'Athens Centre', crowd: 59, price: 2, description: 'An intimate theatre with a programme of Greek and international plays.' },
+      { id: 'lockhill', name: 'Lockhill Escape Rooms', category: 'escape-rooms', area: 'Ampelokipoi', region: 'Athens Centre', crowd: 48, price: 2, description: 'Immersive escape room adventures with themed sets and puzzles for teams.' },
       { id: 'piraeus-marina', name: 'Marina-side aperitivo', category: 'bars', area: 'Piraeus Marina', region: 'Piraeus', crowd: 62, price: 2, description: 'A sample harbor-side pick for a relaxed drink near the water.' },
       { id: 'flisvos-walk', name: 'Flisvos waterfront', category: 'outdoors', area: 'Palaio Faliro', region: 'South Athens', crowd: 35, price: 1, description: 'A sample seaside stroll with room to slow down and catch the breeze.' },
-      { id: 'peristeri-meze', name: 'Peristeri meze night', category: 'dining', area: 'Peristeri', region: 'West Athens', crowd: 57, price: 2, description: 'A sample neighborhood taverna pick for shareable plates and a long dinner.' },
+      { id: 'peristeri-meze', name: 'Peristeri meze night', category: 'dining', additionalCategories: ['mezedopoleia-koutoukia'], area: 'Peristeri', region: 'West Athens', crowd: 57, price: 2, description: 'A sample neighborhood taverna pick for shareable plates and a long dinner.' },
       { id: 'rafina-table', name: 'Rafina harbour table', category: 'dining', area: 'Rafina', region: 'East Attica', crowd: 48, price: 2, description: 'A sample harbor-side meal pick for an easy-going evening.' },
       { id: 'elefsina-arts', name: 'Elefsina arts quarter', category: 'culture', area: 'Elefsina', region: 'West Attica', crowd: 31, price: 1, description: 'A sample culture stop for a quieter change of scene.' }
     ];
 
-    const state = { email: '', region: '', mood: 'chill', appetite: '', budget: 2, groupSize: 2, date: '', sortDescending: true, selectedCategory: '', savedVenues: [], plannedVenues: [], activeFilter: 'all', search: '', currentVenue: '' };
+    const state = { email: '', region: '', mood: 'chill', appetite: '', budget: 2, groupSize: 2, date: '', sortDescending: true, selectedCategory: '', savedVenues: [], plannedVenues: [], activeFilter: 'all', search: '', currentVenue: '', interestCounts: Object.fromEntries(categories.map(category => [category.id, 0])), interestScores: Object.fromEntries(categories.map(category => [category.id, 0])) };
     const signupScreen = document.getElementById('signupScreen');
     const preferencesScreen = document.getElementById('preferencesScreen');
     const categoriesScreen = document.getElementById('categoriesScreen');
@@ -449,6 +477,19 @@
       if (level >= 75) return { label: 'Lively', color: 'var(--red)' };
       if (level >= 50) return { label: 'Getting busy', color: 'var(--amber)' };
       return { label: 'Room to breathe', color: 'var(--green)' };
+    }
+
+    function recordInterest(categoryIds, weight) {
+      for (const id of new Set(categoryIds)) {
+        if (!(id in state.interestCounts)) continue;
+        state.interestCounts[id] += 1;
+        state.interestScores[id] += weight;
+      }
+      if (!document.getElementById('forYouView').hidden) renderForYou();
+    }
+
+    function getVenueCategoryIds(venue) {
+      return [venue.category, ...(venue.additionalCategories || [])];
     }
 
     function getMatchingCategories() {
@@ -496,13 +537,14 @@
     }
 
     function showAppTab(tab) {
-      const views = { today: 'todayView', explore: 'exploreView', saved: 'savedView', plan: 'planView' };
+      const views = { today: 'todayView', explore: 'exploreView', 'for-you': 'forYouView', saved: 'savedView', plan: 'planView' };
       for (const [name, id] of Object.entries(views)) document.getElementById(id).hidden = name !== tab;
       document.querySelectorAll('[data-tab]').forEach(button => {
         if (button.dataset.tab === tab) button.setAttribute('aria-current', 'page');
         else button.removeAttribute('aria-current');
       });
       if (tab === 'explore') renderExplore();
+      if (tab === 'for-you') renderForYou();
       if (tab === 'saved') renderSaved();
       if (tab === 'plan') renderPlan();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -514,12 +556,13 @@
 
     function renderVenueCard(venue, savedCard = false) {
       const category = getVenueCategory(venue);
+      const categoryNames = getVenueCategoryIds(venue).map(id => categories.find(item => item.id === id)?.name).filter(Boolean).join(' · ');
       const crowd = crowdInfo(venue.crowd);
       const isSaved = state.savedVenues.includes(venue.id);
       const isPlanned = state.plannedVenues.includes(venue.id);
       return `<article class="venue-card${savedCard ? ' saved-card' : ''}" style="--tint:${category.tint};--crowd-color:${crowd.color}">
         <span class="venue-emoji" aria-hidden="true">${category.icon}</span>
-        <div class="venue-copy"><strong>${venue.name}</strong><small>${category.name} · ${venue.area} · ${'€'.repeat(venue.price)}</small></div>
+        <div class="venue-copy"><strong>${venue.name}</strong><small>${categoryNames} · ${venue.area} · ${'€'.repeat(venue.price)}</small></div>
         <span class="venue-crowd">${venue.crowd}%</span>
         <div class="venue-actions">
           <button class="small-button" type="button" data-details="${venue.id}">Details</button>
@@ -542,14 +585,45 @@
       document.getElementById('venueFilters').innerHTML = filters.map(filter => `<button class="filter-chip" type="button" data-filter="${filter.id}" aria-pressed="${state.activeFilter === filter.id}">${filter.name}</button>`).join('');
       const query = state.search.trim().toLowerCase();
       const matches = venues.filter(venue => {
-        const category = getVenueCategory(venue);
-        const categoryMatches = state.activeFilter === 'all' || venue.category === state.activeFilter;
-        const searchMatches = !query || `${venue.name} ${category.name} ${venue.area}`.toLowerCase().includes(query);
+        const categoryNames = getVenueCategoryIds(venue).map(id => categories.find(item => item.id === id)?.name || '').join(' ');
+        const categoryMatches = state.activeFilter === 'all' || getVenueCategoryIds(venue).includes(state.activeFilter);
+        const searchMatches = !query || `${venue.name} ${categoryNames} ${venue.area}`.toLowerCase().includes(query);
         return venue.region === state.region && categoryMatches && searchMatches;
       });
       document.getElementById('venueList').innerHTML = matches.length
         ? matches.map(venue => renderVenueCard(venue)).join('')
         : '<div class="empty"><strong>No places found</strong><p>Try a different search or category.</p></div>';
+    }
+
+    function renderForYou() {
+      const recommendations = categories.map(category => {
+        const moodMatch = category.moods.includes(state.mood);
+        const appetiteMatch = state.appetite && category.appetites.includes(state.appetite);
+        const budgetMatch = category.price <= state.budget;
+        const score = state.interestScores[category.id] + (moodMatch ? 3 : 0) + (appetiteMatch ? 3 : 0) + (budgetMatch ? 1 : 0) + (state.selectedCategory === category.id ? 8 : 0);
+        const venue = venues.find(item => item.region === state.region && getVenueCategoryIds(item).includes(category.id));
+        return { category, score, venue };
+      }).sort((a, b) => b.score - a.score || state.interestCounts[b.category.id] - state.interestCounts[a.category.id] || a.category.name.localeCompare(b.category.name));
+
+      document.getElementById('recommendationList').innerHTML = recommendations.map(({ category, venue }) => {
+        const count = state.interestCounts[category.id];
+        const moodMatch = category.moods.includes(state.mood);
+        const appetiteMatch = state.appetite && category.appetites.includes(state.appetite);
+        const reason = count
+          ? `You've shown interest ${count} ${count === 1 ? 'time' : 'times'}${moodMatch || appetiteMatch ? ' · also matches today’s vibe' : ''}`
+          : moodMatch && appetiteMatch ? 'Matches today’s mood and appetite'
+            : moodMatch ? 'Matches today’s mood'
+              : appetiteMatch ? 'Matches today’s appetite'
+                : 'A fresh idea to explore';
+        return `<article class="recommendation-card">
+          <div class="recommendation-heading">
+            <span class="category-icon" style="--tint:${category.tint}" aria-hidden="true">${category.icon}</span>
+            <div class="recommendation-copy"><strong>${category.name}</strong><small>${venue ? `${venue.name} · ${venue.area}` : `No sample venue listed in ${state.region} yet`}</small><small>${reason}</small></div>
+            <span class="interest-count">${count}<br>${count === 1 ? 'signal' : 'signals'}</span>
+          </div>
+          <button class="small-button strong" type="button" data-recommend-category="${category.id}">${venue ? 'Explore this idea' : 'Explore category'}</button>
+        </article>`;
+      }).join('');
     }
 
     function renderSaved() {
@@ -578,11 +652,13 @@
       if (!venue) return;
       const category = getVenueCategory(venue);
       document.getElementById('dialogTitle').textContent = venue.name;
-      document.getElementById('dialogDetails').textContent = `${category.icon} ${category.name} · ${venue.area} · ${'€'.repeat(venue.price)} · ${venue.crowd}% estimated fullness`;
+      const categoryNames = getVenueCategoryIds(venue).map(id => categories.find(item => item.id === id)?.name).filter(Boolean).join(' · ');
+      document.getElementById('dialogDetails').textContent = `${category.icon} ${categoryNames} · ${venue.area} · ${'€'.repeat(venue.price)} · ${venue.crowd}% estimated fullness`;
       document.getElementById('dialogDescription').textContent = venue.description;
       document.getElementById('dialogSave').textContent = state.savedVenues.includes(id) ? '♥ Saved' : '♡ Save place';
       document.getElementById('dialogPlan').textContent = state.plannedVenues.includes(id) ? 'Added to plan ✓' : 'Add to my plan';
       state.currentVenue = id;
+      recordInterest(getVenueCategoryIds(venue), 1);
       document.getElementById('venueDialog').showModal();
     }
 
@@ -590,6 +666,10 @@
       state.savedVenues = state.savedVenues.includes(id)
         ? state.savedVenues.filter(item => item !== id)
         : [...state.savedVenues, id];
+      if (state.savedVenues.includes(id)) {
+        const venue = venues.find(item => item.id === id);
+        recordInterest(getVenueCategoryIds(venue), 3);
+      }
       renderExplore();
       renderSaved();
       const venue = venues.find(item => item.id === id);
@@ -600,6 +680,10 @@
       state.plannedVenues = state.plannedVenues.includes(id)
         ? state.plannedVenues.filter(item => item !== id)
         : [...state.plannedVenues, id];
+      if (state.plannedVenues.includes(id)) {
+        const venue = venues.find(item => item.id === id);
+        recordInterest(getVenueCategoryIds(venue), 4);
+      }
       renderExplore();
       renderSaved();
       renderPlan();
@@ -670,6 +754,7 @@
       const chosen = categories.find(category => category.id === button.dataset.category);
       if (!chosen) return;
       state.selectedCategory = chosen.id;
+      recordInterest([chosen.id], 5);
       renderCategories();
       renderPlan();
       showToast(`${chosen.name} — sounds like a plan for today!`);
@@ -690,12 +775,21 @@
       const filter = event.target.closest('[data-filter]');
       if (filter) {
         state.activeFilter = filter.dataset.filter;
+        if (state.activeFilter !== 'all') recordInterest([state.activeFilter], 1);
         renderExplore();
         return;
       }
       const scene = event.target.closest('[data-scene]');
       if (scene) {
         state.activeFilter = scene.dataset.scene;
+        recordInterest([state.activeFilter], 1);
+        showAppTab('explore');
+        return;
+      }
+      const recommendation = event.target.closest('[data-recommend-category]');
+      if (recommendation) {
+        state.activeFilter = recommendation.dataset.recommendCategory;
+        recordInterest([state.activeFilter], 1);
         showAppTab('explore');
         return;
       }
