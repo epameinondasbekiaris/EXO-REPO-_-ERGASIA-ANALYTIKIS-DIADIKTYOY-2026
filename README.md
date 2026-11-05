@@ -18,8 +18,9 @@ Then visit `http://localhost:8000`.
 2. Choose a date, mood, appetite, budget, and group size.
 3. Browse matching categories by estimated fullness, reverse the sort order, and choose one with **I'm going here**.
 4. Use the bottom navigation to explore places and crowd levels in your selected region, search or filter venues, view place details, save places, and manage your daily plan.
-5. Open **For You** to see recommendations sorted first by the categories you interact with most, then by today's mood, appetite, budget, and region.
+5. On the login screen, use **Forgot Password?** to simulate a reset for a saved account. After confirming the account email, set a new password and use it to sign in.
+6. Open **For You** to see recommendations sorted first by categories you explicitly choose with **I'm going here** or places you add to your plan, then by today's mood, appetite, budget, and region. Browsing, saving, or viewing details does not affect the interest signal.
 
 The app keeps its original categories and includes Escape Rooms, Cinemas (Movie Theaters), Theaters (Live Plays), Mezedopoleia / Koutoukia, Chill Drink Spots, Nightclubs / Nightlife, Bowling & Billiard Halls, and Board Game Cafes. Places can belong to both an original category and a more specific category.
 
-This is a front-end demo only. It does not provide secure authentication or connect to live venue/crowd data. Profile details, preferences, saved places, plans, and recommendation interest counts are stored in browser `localStorage` so returning users can continue where they left off. Passwords are never stored or verified; do not use real credentials. Venue and fullness data are examples.
+This is a front-end demo only. It does not provide secure authentication or connect to live venue/crowd data. Profile details, preferences, saved places, plans, passwords, and recommendation interest counts are stored in browser `localStorage` so returning users can continue where they left off. Password reset is simulated and does not send email; do not use real credentials. Venue and fullness data are examples.

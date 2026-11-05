@@ -212,6 +212,8 @@
     .dialog-top h2 { margin: 0; font-size: 22px; }
     .dialog-close { width: 38px; height: 38px; flex: 0 0 auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 19px; }
     .detail-dialog p { color: #647168; font-size: 14px; line-height: 1.55; }
+    .detail-dialog .field-hint { color: var(--muted); font-size: 11px; }
+    .detail-dialog .error { color: #a83e32; font-size: 12px; }
     @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (min-width: 700px) {
@@ -267,6 +269,7 @@
             <input id="password" name="password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required aria-describedby="passwordHint">
             <p class="field-hint" id="passwordHint">Use 12+ characters with an uppercase letter, a lowercase letter, a number, and a symbol.</p>
           </div>
+          <button class="text-button" id="forgotPasswordButton" type="button" hidden>Forgot Password?</button>
           <div class="field" id="regionField">
             <label for="region">Your region in Attica</label>
             <select id="region" name="region" required>
@@ -282,7 +285,7 @@
           </div>
           <p class="error" id="signupError" role="alert" aria-live="polite"></p>
           <button class="primary" id="authSubmit" type="submit">Sign Up <span aria-hidden="true">→</span></button>
-          <p class="privacy-note"><span aria-hidden="true">🔒</span><span>This browser-only demo saves your profile and preferences, never your password. Sign-in recognizes your email but does not verify passwords.</span></p>
+          <p class="privacy-note"><span aria-hidden="true">🔒</span><span>This browser-only demo stores profile data and simulated credentials in localStorage. Do not use real passwords; this is not secure authentication.</span></p>
         </form>
       </section>
 
@@ -402,10 +405,10 @@
           <div class="view-header">
             <p class="eyebrow">Picked around your interests</p>
             <h1 id="forYouTitle">For you.</h1>
-            <p class="intro">Your recommendations learn from categories and places you explore, save, plan, and choose.</p>
+            <p class="intro">Your recommendations learn from categories you choose and places you add to your plan.</p>
           </div>
           <div class="recommendation-list" id="recommendationList"></div>
-          <p class="footnote">Interest counts are based on your saved interactions. Today's mood, appetite, budget, and region also shape these recommendations.</p>
+          <p class="footnote">Interest counts reflect categories you choose and places you add to your plan. Today's mood, appetite, budget, and region also shape these recommendations.</p>
         </section>
 
         <section id="planView" class="app-view" hidden aria-labelledby="planTitle">
@@ -432,6 +435,33 @@
     <p id="dialogDetails"></p>
     <p id="dialogDescription"></p>
     <div class="venue-actions"><button class="small-button" id="dialogSave" type="button">♡ Save place</button><button class="small-button strong" id="dialogPlan" type="button">Add to my plan</button></div>
+  </dialog>
+  <dialog class="detail-dialog" id="passwordResetDialog" aria-labelledby="passwordResetTitle">
+    <div class="dialog-top">
+      <h2 id="passwordResetTitle">Reset your password</h2>
+      <button class="dialog-close" id="closePasswordReset" type="button" aria-label="Close password reset">×</button>
+    </div>
+    <form id="passwordResetEmailForm">
+      <p class="field-hint">Enter the email address for your account to request a reset.</p>
+      <div class="field">
+        <label for="resetEmail">Email address</label>
+        <input id="resetEmail" name="resetEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <p class="error" id="resetEmailError" role="alert" aria-live="polite"></p>
+      <button class="primary" type="submit">Send reset link</button>
+    </form>
+    <div id="passwordResetCompletion" hidden>
+      <p id="passwordResetSuccess" role="status">A password reset link has been successfully sent to your email!</p>
+      <form id="newPasswordForm">
+        <div class="field">
+          <label for="newPassword">New Password</label>
+          <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="12" required aria-describedby="newPasswordHint">
+          <p class="field-hint" id="newPasswordHint">Use 12+ characters with an uppercase letter, a lowercase letter, a number, and a symbol.</p>
+        </div>
+        <p class="error" id="newPasswordError" role="alert" aria-live="polite"></p>
+        <button class="primary" type="submit">OK</button>
+      </form>
+    </div>
   </dialog>
 
   <script>
@@ -518,11 +548,14 @@
       }
     }
 
-    function saveProfile() {
+    function saveProfile(password = null) {
       if (!state.email) return false;
       const profiles = readProfiles();
       if (!profiles) return false;
-      profiles[state.email.toLowerCase()] = {
+      const email = state.email.toLowerCase();
+      profiles[email] = {
+        ...(profiles[email] && typeof profiles[email].password === 'string' ? { password: profiles[email].password } : {}),
+        ...(password === null ? {} : { password }),
         username: state.username,
         region: state.region,
         completed: Boolean(state.date && state.appetite),
@@ -568,6 +601,7 @@
       document.getElementById('password').autocomplete = isLogin ? 'current-password' : 'new-password';
       document.getElementById('password').minLength = isLogin ? 0 : 12;
       document.getElementById('passwordHint').hidden = isLogin;
+      document.getElementById('forgotPasswordButton').hidden = !isLogin;
       document.getElementById('showLogin').hidden = isLogin;
       document.getElementById('showSignup').hidden = !isLogin;
       document.getElementById('authPrompt').textContent = isLogin ? 'New to Exo Repo?' : 'Already have an account?';
@@ -793,7 +827,6 @@
       document.getElementById('dialogSave').textContent = state.savedVenues.includes(id) ? '♥ Saved' : '♡ Save place';
       document.getElementById('dialogPlan').textContent = state.plannedVenues.includes(id) ? 'Added to plan ✓' : 'Add to my plan';
       state.currentVenue = id;
-      recordInterest(getVenueCategoryIds(venue), 1);
       document.getElementById('venueDialog').showModal();
     }
 
@@ -802,10 +835,6 @@
         ? state.savedVenues.filter(item => item !== id)
         : [...state.savedVenues, id];
       saveProfile();
-      if (state.savedVenues.includes(id)) {
-        const venue = venues.find(item => item.id === id);
-        recordInterest(getVenueCategoryIds(venue), 3);
-      }
       renderExplore();
       renderSaved();
       const venue = venues.find(item => item.id === id);
@@ -841,6 +870,12 @@
         const profile = profiles[email];
         if (!profile || typeof profile.username !== 'string' || typeof profile.region !== 'string') {
           error.textContent = 'No saved profile was found for this email. Please sign up first.';
+          return;
+        }
+        if (typeof profile.password !== 'string' || profile.password !== document.getElementById('password').value) {
+          error.textContent = typeof profile.password === 'string'
+            ? 'The password is incorrect. Please try again or reset your password.'
+            : 'No password is saved for this profile. Use Forgot Password? to set one.';
           return;
         }
         restoreProfile(email, profile);
@@ -879,7 +914,7 @@
       document.getElementById('dailyRegion').value = state.region;
       document.getElementById('password').value = '';
       updateAccountHeader();
-      saveProfile();
+      saveProfile(password);
       showScreen('preferences');
     });
 
@@ -914,6 +949,65 @@
 
     document.getElementById('showLogin').addEventListener('click', () => setAuthMode('login'));
     document.getElementById('showSignup').addEventListener('click', () => setAuthMode('signup'));
+    document.getElementById('forgotPasswordButton').addEventListener('click', () => {
+      const dialog = document.getElementById('passwordResetDialog');
+      document.getElementById('passwordResetEmailForm').reset();
+      document.getElementById('resetEmailError').textContent = '';
+      document.getElementById('passwordResetEmailForm').hidden = false;
+      document.getElementById('passwordResetCompletion').hidden = true;
+      document.getElementById('newPasswordError').textContent = '';
+      dialog.showModal();
+    });
+    document.getElementById('closePasswordReset').addEventListener('click', () => document.getElementById('passwordResetDialog').close());
+    document.getElementById('passwordResetEmailForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+      const error = document.getElementById('resetEmailError');
+      const profiles = readProfiles();
+      if (!profiles) return;
+      if (!profiles[email] || typeof profiles[email].username !== 'string') {
+        error.textContent = 'No saved profile was found for this email. Please check the address and try again.';
+        return;
+      }
+      document.getElementById('passwordResetEmailForm').hidden = true;
+      document.getElementById('passwordResetCompletion').hidden = false;
+      document.getElementById('newPassword').value = '';
+      document.getElementById('newPasswordError').textContent = '';
+    });
+    document.getElementById('newPasswordForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const password = document.getElementById('newPassword').value;
+      const error = document.getElementById('newPasswordError');
+      const securePassword = password.length >= 12
+        && /[a-z]/.test(password)
+        && /[A-Z]/.test(password)
+        && /\d/.test(password)
+        && /[^A-Za-z0-9]/.test(password);
+      if (!securePassword) {
+        error.textContent = 'Add an uppercase letter, a lowercase letter, a number, and a symbol to your password.';
+        document.getElementById('newPassword').focus();
+        return;
+      }
+      const email = document.getElementById('resetEmail').value.trim().toLowerCase();
+      const profiles = readProfiles();
+      if (!profiles) return;
+      const profile = profiles[email];
+      if (!profile || typeof profile.username !== 'string') {
+        error.textContent = 'No saved profile was found for this email. Please request a new reset.';
+        return;
+      }
+      profile.password = password;
+      try {
+        localStorage.setItem(profilesStorageKey, JSON.stringify(profiles));
+      } catch (storageError) {
+        showToast(`Could not save your new password: ${storageError.message}`);
+        return;
+      }
+      document.getElementById('email').value = email;
+      document.getElementById('password').value = '';
+      document.getElementById('passwordResetDialog').close();
+      showToast('Password updated. You can now log in.');
+    });
     document.getElementById('brandHome').addEventListener('click', () => {
       if (state.email) {
         document.getElementById('dailyRegion').value = state.region;
@@ -990,21 +1084,18 @@
       const filter = event.target.closest('[data-filter]');
       if (filter) {
         state.activeFilter = filter.dataset.filter;
-        if (state.activeFilter !== 'all') recordInterest([state.activeFilter], 1);
         renderExplore();
         return;
       }
       const scene = event.target.closest('[data-scene]');
       if (scene) {
         state.activeFilter = scene.dataset.scene;
-        recordInterest([state.activeFilter], 1);
         showAppTab('explore');
         return;
       }
       const recommendation = event.target.closest('[data-recommend-category]');
       if (recommendation) {
         state.activeFilter = recommendation.dataset.recommendCategory;
-        recordInterest([state.activeFilter], 1);
         showAppTab('explore');
         return;
       }
