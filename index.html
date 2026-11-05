@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f6ef">
-  <title>Exo Repo — Find your Attica</title>
+  <title>Exo Repo — Plan your repo</title>
   <style>
     :root {
       color-scheme: light;
@@ -35,6 +35,14 @@
     .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 76px; }
     .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 800; letter-spacing: -.7px; }
     .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 12px 12px 12px 4px; background: var(--lime); font-size: 19px; }
+    .brand { padding: 0; border: 0; background: transparent; }
+    .topbar-actions, .profile-display { display: inline-flex; align-items: center; gap: 8px; }
+    .profile-display { color: #58655d; font-size: 12px; font-weight: 750; }
+    .profile-avatar { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #eaf3d0; font-size: 18px; }
+    #profileName { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sign-out-button { min-height: 35px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; background: #fff; font-size: 11px; font-weight: 750; }
+    .auth-switch { display: flex; align-items: center; gap: 5px; margin: -13px 0 15px; color: #647168; font-size: 12px; }
+    .auth-switch .text-button { padding: 6px; color: var(--ink); }
     .step-indicator { color: var(--muted); font-size: 12px; font-weight: 700; }
     main { padding: 24px 0 48px; }
     .eyebrow { margin: 0 0 9px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; }
@@ -97,6 +105,7 @@
     .choice-emoji { margin-right: 5px; font-size: 17px; vertical-align: -2px; }
     .split-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .split-choices .choice { min-height: 59px; padding: 10px; text-align: center; }
+    #appetiteChoices [data-value="none"] { grid-column: 1 / -1; }
     .preference-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
     .preference-controls .field { margin: 0; }
     .preference-controls select { min-height: 46px; }
@@ -162,8 +171,8 @@
     .scene-card { min-height: 89px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--tint); text-align: left; }
     .scene-card strong { display: block; font-size: 12px; }
     .scene-card small { display: block; margin-top: 7px; color: #58655d; font-size: 11px; }
-    .scene-card .scene-meter { height: 4px; margin-top: 9px; overflow: hidden; border-radius: 4px; background: rgba(255,255,255,.7); }
-    .scene-card .scene-meter span { display: block; height: 100%; background: var(--ink); }
+    .scene-card .scene-meter { display: block; width: 100%; height: 4px; margin-top: 9px; overflow: hidden; border-radius: 4px; background: rgba(255,255,255,.7); }
+    .scene-card .scene-meter span { display: block; max-width: 100%; height: 100%; background: var(--ink); }
     .search-field { display: flex; min-height: 48px; align-items: center; gap: 9px; margin: 16px 0 12px; padding: 0 13px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
     .search-field span { color: var(--muted); font-size: 17px; }
     .search-field input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 14px; }
@@ -226,26 +235,39 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <a class="brand" href="#" aria-label="Exo Repo home"><span class="brand-mark" aria-hidden="true">✳</span>exo repo</a>
-      <span class="step-indicator" id="stepIndicator">WELCOME · 1 OF 3</span>
+      <button class="brand" id="brandHome" type="button" aria-label="Exo Repo home"><span class="brand-mark" aria-hidden="true">✳</span>exo repo</button>
+      <div class="topbar-actions">
+        <span class="profile-display" id="profileDisplay" hidden><span class="profile-avatar" aria-hidden="true">☺</span><span id="profileName"></span></span>
+        <span class="step-indicator" id="stepIndicator">WELCOME · 1 OF 3</span>
+        <button class="sign-out-button" id="signOutButton" type="button" hidden>Sign out</button>
+      </div>
     </header>
 
     <main>
       <section id="signupScreen" aria-labelledby="signupTitle">
         <p class="eyebrow">Good plans start close to home</p>
-        <h1 id="signupTitle">Find your<br>Attica.</h1>
-        <p class="intro">Sign up, tell us how today feels, and find the scene that suits you.</p>
+        <h1 id="signupTitle">Plan your<br>repo.</h1>
+        <p class="intro" id="authIntro">Sign up, tell us how today feels, and find the scene that suits you.</p>
+        <div class="auth-switch">
+          <span id="authPrompt">Already have an account?</span>
+          <button class="text-button" id="showLogin" type="button">Log In</button>
+          <button class="text-button" id="showSignup" type="button" hidden>Sign Up</button>
+        </div>
         <form class="panel" id="signupForm">
+          <div class="field" id="usernameField">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" placeholder="How should we call you?" autocomplete="nickname" maxlength="40" required>
+          </div>
           <div class="field">
             <label for="email">Email address</label>
             <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email" required>
           </div>
           <div class="field">
-            <label for="password">Create a password</label>
+            <label for="password" id="passwordLabel">Create a password</label>
             <input id="password" name="password" type="password" placeholder="At least 12 characters" autocomplete="new-password" minlength="12" required aria-describedby="passwordHint">
             <p class="field-hint" id="passwordHint">Use 12+ characters with an uppercase letter, a lowercase letter, a number, and a symbol.</p>
           </div>
-          <div class="field">
+          <div class="field" id="regionField">
             <label for="region">Your region in Attica</label>
             <select id="region" name="region" required>
               <option value="" selected disabled>Select your area</option>
@@ -259,8 +281,8 @@
             </select>
           </div>
           <p class="error" id="signupError" role="alert" aria-live="polite"></p>
-          <button class="primary" type="submit">Sign Up <span aria-hidden="true">→</span></button>
-          <p class="privacy-note"><span aria-hidden="true">🔒</span><span>This is a front-end demo. Your password is checked for strength but never saved or sent anywhere.</span></p>
+          <button class="primary" id="authSubmit" type="submit">Sign Up <span aria-hidden="true">→</span></button>
+          <p class="privacy-note"><span aria-hidden="true">🔒</span><span>This browser-only demo saves your profile and preferences, never your password. Sign-in recognizes your email but does not verify passwords.</span></p>
         </form>
       </section>
 
@@ -292,6 +314,7 @@
               <button class="choice" type="button" data-choice="appetite" data-value="light" aria-pressed="false"><strong>🥐 Light</strong></button>
               <button class="choice" type="button" data-choice="appetite" data-value="hungry" aria-pressed="false"><strong>🍽️ Hungry</strong></button>
               <button class="choice" type="button" data-choice="appetite" data-value="drinks" aria-pressed="false"><strong>🍸 Drinks</strong></button>
+              <button class="choice" type="button" data-choice="appetite" data-value="none" aria-pressed="false"><strong>No food for today</strong></button>
             </div>
           </fieldset>
 
@@ -382,7 +405,7 @@
             <p class="intro">Your recommendations learn from categories and places you explore, save, plan, and choose.</p>
           </div>
           <div class="recommendation-list" id="recommendationList"></div>
-          <p class="footnote">Interest counts are based on your actions during this session. Today's mood, appetite, budget, and region also shape these recommendations.</p>
+          <p class="footnote">Interest counts are based on your saved interactions. Today's mood, appetite, budget, and region also shape these recommendations.</p>
         </section>
 
         <section id="planView" class="app-view" hidden aria-labelledby="planTitle">
@@ -448,12 +471,15 @@
       { id: 'elefsina-arts', name: 'Elefsina arts quarter', category: 'culture', area: 'Elefsina', region: 'West Attica', crowd: 31, price: 1, description: 'A sample culture stop for a quieter change of scene.' }
     ];
 
-    const state = { email: '', region: '', mood: 'chill', appetite: '', budget: 2, groupSize: 2, date: '', sortDescending: true, selectedCategory: '', savedVenues: [], plannedVenues: [], activeFilter: 'all', search: '', currentVenue: '', interestCounts: Object.fromEntries(categories.map(category => [category.id, 0])), interestScores: Object.fromEntries(categories.map(category => [category.id, 0])) };
+    const state = { email: '', username: '', region: '', mood: 'chill', appetite: '', budget: 2, groupSize: 2, date: '', sortDescending: true, selectedCategory: '', savedVenues: [], plannedVenues: [], activeFilter: 'all', search: '', currentVenue: '', interestCounts: Object.fromEntries(categories.map(category => [category.id, 0])), interestScores: Object.fromEntries(categories.map(category => [category.id, 0])) };
     const signupScreen = document.getElementById('signupScreen');
     const preferencesScreen = document.getElementById('preferencesScreen');
     const categoriesScreen = document.getElementById('categoriesScreen');
     const stepIndicator = document.getElementById('stepIndicator');
     const toast = document.getElementById('toast');
+    const profilesStorageKey = 'exoRepoProfiles';
+    const lastEmailStorageKey = 'exoRepoLastEmail';
+    let authMode = 'signup';
     let toastTimer;
 
     function showScreen(screen) {
@@ -473,6 +499,114 @@
       toastTimer = window.setTimeout(() => { toast.hidden = true; }, 2800);
     }
 
+    function readProfiles() {
+      let serialized;
+      try {
+        serialized = localStorage.getItem(profilesStorageKey);
+      } catch (error) {
+        showToast(`Could not read saved profiles: ${error.message}`);
+        return null;
+      }
+      if (!serialized) return {};
+      try {
+        const profiles = JSON.parse(serialized);
+        if (!profiles || typeof profiles !== 'object' || Array.isArray(profiles)) throw new Error('Saved profile data has an invalid format.');
+        return profiles;
+      } catch (error) {
+        showToast(`Could not read saved profiles: ${error.message}`);
+        return null;
+      }
+    }
+
+    function saveProfile() {
+      if (!state.email) return false;
+      const profiles = readProfiles();
+      if (!profiles) return false;
+      profiles[state.email.toLowerCase()] = {
+        username: state.username,
+        region: state.region,
+        completed: Boolean(state.date && state.appetite),
+        preferences: {
+          mood: state.mood,
+          appetite: state.appetite,
+          budget: state.budget,
+          groupSize: state.groupSize,
+          date: state.date,
+          selectedCategory: state.selectedCategory
+        },
+        savedVenues: state.savedVenues,
+        plannedVenues: state.plannedVenues,
+        interestCounts: state.interestCounts,
+        interestScores: state.interestScores
+      };
+      try {
+        localStorage.setItem(profilesStorageKey, JSON.stringify(profiles));
+        localStorage.setItem(lastEmailStorageKey, state.email);
+        return true;
+      } catch (error) {
+        showToast(`Could not save your profile: ${error.message}`);
+        return false;
+      }
+    }
+
+    function updateAccountHeader() {
+      const signedIn = Boolean(state.email && state.username);
+      document.getElementById('profileDisplay').hidden = !signedIn;
+      document.getElementById('profileName').textContent = state.username;
+      document.getElementById('signOutButton').hidden = !signedIn;
+      stepIndicator.hidden = signedIn;
+    }
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      const isLogin = mode === 'login';
+      document.getElementById('usernameField').hidden = isLogin;
+      document.getElementById('regionField').hidden = isLogin;
+      document.getElementById('username').required = !isLogin;
+      document.getElementById('region').required = !isLogin;
+      document.getElementById('passwordLabel').textContent = isLogin ? 'Password' : 'Create a password';
+      document.getElementById('password').autocomplete = isLogin ? 'current-password' : 'new-password';
+      document.getElementById('password').minLength = isLogin ? 0 : 12;
+      document.getElementById('passwordHint').hidden = isLogin;
+      document.getElementById('showLogin').hidden = isLogin;
+      document.getElementById('showSignup').hidden = !isLogin;
+      document.getElementById('authPrompt').textContent = isLogin ? 'New to Exo Repo?' : 'Already have an account?';
+      document.getElementById('authSubmit').innerHTML = `${isLogin ? 'Log In' : 'Sign Up'} <span aria-hidden="true">→</span>`;
+      document.getElementById('authIntro').textContent = isLogin
+        ? 'Welcome back. Sign in to pick up where you left off.'
+        : 'Sign up, tell us how today feels, and find the scene that suits you.';
+      document.getElementById('signupError').textContent = '';
+    }
+
+    function restoreProfile(email, profile) {
+      state.email = email;
+      state.username = profile.username;
+      state.region = profile.region;
+      state.mood = profile.preferences?.mood || 'chill';
+      state.appetite = profile.preferences?.appetite || '';
+      state.budget = Number(profile.preferences?.budget) || 2;
+      state.groupSize = String(profile.preferences?.groupSize || '2');
+      state.date = profile.preferences?.date && profile.preferences.date >= document.getElementById('planDate').min
+        ? profile.preferences.date
+        : document.getElementById('planDate').value;
+      state.selectedCategory = profile.preferences?.selectedCategory || '';
+      state.savedVenues = Array.isArray(profile.savedVenues) ? profile.savedVenues : [];
+      state.plannedVenues = Array.isArray(profile.plannedVenues) ? profile.plannedVenues : [];
+      state.interestCounts = { ...Object.fromEntries(categories.map(category => [category.id, 0])), ...(profile.interestCounts || {}) };
+      state.interestScores = { ...Object.fromEntries(categories.map(category => [category.id, 0])), ...(profile.interestScores || {}) };
+      document.getElementById('region').value = state.region;
+      document.getElementById('dailyRegion').value = state.region;
+      document.getElementById('budget').value = String(state.budget);
+      document.getElementById('groupSize').value = state.groupSize;
+      document.getElementById('planDate').value = state.date || document.getElementById('planDate').value;
+      for (const group of ['mood', 'appetite']) {
+        document.querySelectorAll(`[data-choice="${group}"]`).forEach(button => {
+          button.setAttribute('aria-pressed', String(button.dataset.value === state[group]));
+        });
+      }
+      updateAccountHeader();
+    }
+
     function crowdInfo(level) {
       if (level >= 75) return { label: 'Lively', color: 'var(--red)' };
       if (level >= 50) return { label: 'Getting busy', color: 'var(--amber)' };
@@ -485,6 +619,7 @@
         state.interestCounts[id] += 1;
         state.interestScores[id] += weight;
       }
+      saveProfile();
       if (!document.getElementById('forYouView').hidden) renderForYou();
     }
 
@@ -495,14 +630,14 @@
     function getMatchingCategories() {
       return categories
         .filter(category => category.moods.includes(state.mood))
-        .filter(category => category.appetites.includes(state.appetite))
+        .filter(category => state.appetite === 'none' || category.appetites.includes(state.appetite))
         .filter(category => category.price <= state.budget)
         .sort((a, b) => state.sortDescending ? b.crowd - a.crowd : a.crowd - b.crowd);
     }
 
     function renderCategories() {
       const moodName = state.mood[0].toUpperCase() + state.mood.slice(1);
-      const appetiteName = { light: 'Light bite', hungry: 'Hungry', drinks: 'Drinks' }[state.appetite];
+      const appetiteName = { light: 'Light bite', hungry: 'Hungry', drinks: 'Drinks', none: 'No food today' }[state.appetite];
       document.getElementById('regionEyebrow').textContent = `${state.region.toUpperCase()} · ${new Date(`${state.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()}`;
       document.getElementById('preferenceSummary').innerHTML = [
         `${moodName} mood`,
@@ -603,7 +738,7 @@
         const score = state.interestScores[category.id] + (moodMatch ? 3 : 0) + (appetiteMatch ? 3 : 0) + (budgetMatch ? 1 : 0) + (state.selectedCategory === category.id ? 8 : 0);
         const venue = venues.find(item => item.region === state.region && getVenueCategoryIds(item).includes(category.id));
         return { category, score, venue };
-      }).sort((a, b) => b.score - a.score || state.interestCounts[b.category.id] - state.interestCounts[a.category.id] || a.category.name.localeCompare(b.category.name));
+      }).sort((a, b) => state.interestCounts[b.category.id] - state.interestCounts[a.category.id] || b.score - a.score || a.category.name.localeCompare(b.category.name));
 
       document.getElementById('recommendationList').innerHTML = recommendations.map(({ category, venue }) => {
         const count = state.interestCounts[category.id];
@@ -666,6 +801,7 @@
       state.savedVenues = state.savedVenues.includes(id)
         ? state.savedVenues.filter(item => item !== id)
         : [...state.savedVenues, id];
+      saveProfile();
       if (state.savedVenues.includes(id)) {
         const venue = venues.find(item => item.id === id);
         recordInterest(getVenueCategoryIds(venue), 3);
@@ -680,6 +816,7 @@
       state.plannedVenues = state.plannedVenues.includes(id)
         ? state.plannedVenues.filter(item => item !== id)
         : [...state.plannedVenues, id];
+      saveProfile();
       if (state.plannedVenues.includes(id)) {
         const venue = venues.find(item => item.id === id);
         recordInterest(getVenueCategoryIds(venue), 4);
@@ -694,25 +831,55 @@
     document.getElementById('signupForm').addEventListener('submit', event => {
       event.preventDefault();
       const form = event.currentTarget;
-      const password = document.getElementById('password').value;
       const error = document.getElementById('signupError');
+      if (!form.reportValidity()) return;
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const profiles = readProfiles();
+      if (!profiles) return;
+
+      if (authMode === 'login') {
+        const profile = profiles[email];
+        if (!profile || typeof profile.username !== 'string' || typeof profile.region !== 'string') {
+          error.textContent = 'No saved profile was found for this email. Please sign up first.';
+          return;
+        }
+        restoreProfile(email, profile);
+        document.getElementById('password').value = '';
+        saveProfile();
+        if (profile.completed && state.appetite && state.date) {
+          renderCategories();
+          renderPlan();
+          showAppTab('today');
+          showScreen('categories');
+        } else {
+          showScreen('preferences');
+        }
+        return;
+      }
+
+      const password = document.getElementById('password').value;
       const securePassword = password.length >= 12
         && /[a-z]/.test(password)
         && /[A-Z]/.test(password)
         && /\d/.test(password)
         && /[^A-Za-z0-9]/.test(password);
-
-      if (!form.reportValidity()) return;
       if (!securePassword) {
         error.textContent = 'Add an uppercase letter, a lowercase letter, a number, and a symbol to your password.';
         document.getElementById('password').focus();
         return;
       }
+      if (profiles[email]) {
+        error.textContent = 'An account already exists for this email. Choose Log In instead.';
+        return;
+      }
       error.textContent = '';
-      state.email = document.getElementById('email').value.trim();
+      state.email = email;
+      state.username = document.getElementById('username').value.trim();
       state.region = document.getElementById('region').value;
       document.getElementById('dailyRegion').value = state.region;
       document.getElementById('password').value = '';
+      updateAccountHeader();
+      saveProfile();
       showScreen('preferences');
     });
 
@@ -721,6 +888,7 @@
         const group = button.dataset.choice;
         document.querySelectorAll(`[data-choice="${group}"]`).forEach(option => option.setAttribute('aria-pressed', String(option === button)));
         state[group] = button.dataset.value;
+        saveProfile();
       });
     });
 
@@ -738,9 +906,56 @@
       state.groupSize = document.getElementById('groupSize').value;
       state.region = document.getElementById('dailyRegion').value;
       state.selectedCategory = '';
+      saveProfile();
       renderCategories();
       showAppTab('today');
       showScreen('categories');
+    });
+
+    document.getElementById('showLogin').addEventListener('click', () => setAuthMode('login'));
+    document.getElementById('showSignup').addEventListener('click', () => setAuthMode('signup'));
+    document.getElementById('brandHome').addEventListener('click', () => {
+      if (state.email) {
+        document.getElementById('dailyRegion').value = state.region;
+        document.getElementById('budget').value = String(state.budget);
+        document.getElementById('groupSize').value = state.groupSize;
+        if (state.date) document.getElementById('planDate').value = state.date;
+        showScreen('preferences');
+      } else {
+        showScreen('signup');
+      }
+    });
+    document.getElementById('signOutButton').addEventListener('click', () => {
+      const lastEmail = state.email;
+      state.email = '';
+      state.username = '';
+      state.region = '';
+      state.mood = 'chill';
+      state.appetite = '';
+      state.budget = 2;
+      state.groupSize = 2;
+      state.date = '';
+      state.selectedCategory = '';
+      state.savedVenues = [];
+      state.plannedVenues = [];
+      state.interestCounts = Object.fromEntries(categories.map(category => [category.id, 0]));
+      state.interestScores = Object.fromEntries(categories.map(category => [category.id, 0]));
+      document.getElementById('password').value = '';
+      document.getElementById('email').value = lastEmail;
+      document.getElementById('appetiteChoices').querySelectorAll('[data-choice="appetite"]').forEach(button => button.setAttribute('aria-pressed', 'false'));
+      document.getElementById('moodChoices').querySelectorAll('[data-choice="mood"]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.value === 'chill')));
+      updateAccountHeader();
+      setAuthMode('login');
+      showScreen('signup');
+    });
+    ['planDate', 'budget', 'groupSize', 'dailyRegion'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => {
+        if (id === 'planDate') state.date = document.getElementById(id).value;
+        if (id === 'budget') state.budget = Number(document.getElementById(id).value);
+        if (id === 'groupSize') state.groupSize = document.getElementById(id).value;
+        if (id === 'dailyRegion') state.region = document.getElementById(id).value;
+        saveProfile();
+      });
     });
 
     document.getElementById('sortButton').addEventListener('click', () => {
@@ -826,6 +1041,23 @@
     const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
     document.getElementById('planDate').value = localDate;
     document.getElementById('planDate').min = localDate;
+    let returningEmail = '';
+    try {
+      returningEmail = localStorage.getItem(lastEmailStorageKey) || '';
+    } catch (error) {
+      showToast(`Could not read your saved sign-in: ${error.message}`);
+    }
+    if (returningEmail) {
+      const profiles = readProfiles();
+      if (profiles?.[returningEmail.toLowerCase()]) {
+        document.getElementById('email').value = returningEmail;
+        setAuthMode('login');
+      } else {
+        setAuthMode('signup');
+      }
+    } else {
+      setAuthMode('signup');
+    }
   </script>
 </body>
 </html>
